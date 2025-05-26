@@ -238,6 +238,13 @@ body {
     transition: all 0.5s ease;
 }
 
+.no-products {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-style: italic;
+}
+
 .company_logos {
     max-width: 1200px;
     margin: 34px auto;
