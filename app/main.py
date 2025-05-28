@@ -17,7 +17,8 @@ app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-#app.mount("/uploads", StaticFiles(directory=BASE_DIR / "static" / "uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory=BASE_DIR / "static" / "uploads"), name="uploads")
+app.mount("/products/uploads", StaticFiles(directory=BASE_DIR / "static" / "uploads"), name="product_uploads")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 #app.add_middleware(
