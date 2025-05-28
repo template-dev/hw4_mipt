@@ -5,7 +5,7 @@ from enum import Enum
 
 class OrderItem(BaseModel):
     product_id: int = Field(..., gt=0)
-    quantity: conint(gt=0, le=100)
+    quantity: int = Field(gt=0, le=100)
 
 class OrderStatus(str, Enum):
     CREATED = "created"

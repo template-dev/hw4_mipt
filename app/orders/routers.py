@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import delete, update
@@ -9,7 +9,7 @@ from app.database.db import AsyncSessionLocal
 from .schemas import OrderCreate, OrderResponse, OrderStatus
 from .models import Order, OrderStatus as DBOrderStatus
 
-router = APIRouter(prefix="/orders", tags=["Orders"])
+router = APIRouter(prefix="/order", tags=["Orders"])
 
 async def get_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
@@ -24,6 +24,7 @@ async def create_order(
     x_session_id: str = Header(default=None),
     db: AsyncSession = Depends(get_db)
 ):
+    print("Session ID from browser:", x_session_id)
     db_order = Order(
         customer_name=order_data.customer_name,
         customer_surname=order_data.customer_surname,

@@ -2,7 +2,9 @@ from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from app.products.routers import router as products_router
+from app.orders.routers import router as order_router
 from app.database.db import engine, Base, AsyncSessionLocal
 from app.products.models import Product
 from sqlalchemy.future import select
@@ -14,12 +16,20 @@ from app.products.routers import get_product_by_id
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
-#app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-app.mount("/uploads", StaticFiles(directory=BASE_DIR / "static" / "uploads"), name="uploads")
-
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+#app.mount("/uploads", StaticFiles(directory=BASE_DIR / "static" / "uploads"), name="uploads")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
+#app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=["*"],
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+#)
+
 app.include_router(products_router)
+app.include_router(order_router)
 
 async def create_tables():
     async with engine.begin() as conn:

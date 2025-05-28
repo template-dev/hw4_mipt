@@ -1,92 +1,67 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const quantityInputs = document.querySelectorAll('input[name="quantity_number"]');
-    const removeButtons = document.querySelectorAll('.basket__remove-item-button');
-    const checkoutLink = document.getElementById('checkoutLink');
+    const buyButtons = document.querySelectorAll('.bulb__button-buy');
+    const basketCountSpan = document.querySelector('.basket__count');
+    const basketLink = document.querySelector('.header__nav-link[href="/basket"]');
     const modal = document.querySelector('.modal__info');
     const modalCloseBtn = document.querySelector('.modal__close-button');
 
-    if (checkoutLink) {
-        checkoutLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            if (isBasketEmpty()) {
-                modal.style.display = 'flex';
-                return;
+    function updateBasketCount() {
+        const basket = JSON.parse(localStorage.getItem('basket')) || [];
+        const totalCount = basket.reduce((sum, item) => sum + item.quantity, 0);
+        if (basketCountSpan) {
+            basketCountSpan.textContent = totalCount;
+        }
+    }
+
+    if (basketLink) {
+        basketLink.addEventListener('click', function(e) {
+            const basket = JSON.parse(localStorage.getItem('basket')) || [];
+            if (basket.length === 0) {
+                e.preventDefault();
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
             }
-            
-            saveBasketToStorage();
-            window.location.href = this.href;
         });
     }
-    
-    function isBasketEmpty() {
-        const basketItems = document.querySelectorAll('.basket__item');
-        return basketItems.length === 0;
-    }
-    
-    function calculateTotals() {
-        let subtotal = 0;
-        
-        document.querySelectorAll('.basket__item').forEach(row => {
-        const priceText = row.querySelector('td:nth-child(4)').textContent;
-        const price = parseFloat(priceText.replace(/[^\d.]/g, ''));
-        const quantityInput = row.querySelector('input[name="quantity_number"]');
-        const quantity = parseInt(quantityInput.value) || 0;
-        
-        subtotal += price * quantity;
-        
-        const rowSubtotal = row.querySelector('td:last-child');
-        rowSubtotal.textContent = (price * quantity).toFixed(2) + ' RUB';
+
+    if (modalCloseBtn && modal) {
+        modalCloseBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
         });
-        
-        const delivery = 250;
-        const total = subtotal + delivery;
-        
-        document.querySelector('input[name="subtotal"]').value = subtotal.toFixed(2);
-        document.querySelector('input[name="delivery"]').value = delivery.toFixed(2);
-        document.querySelector('input[name="total"]').value = total.toFixed(2);
     }
-    
-    quantityInputs.forEach(input => {
-        input.addEventListener('change', calculateTotals);
-        input.addEventListener('input', calculateTotals);
-    });
-    
-    removeButtons.forEach(button => {
+
+    buyButtons.forEach(button => {
         button.addEventListener('click', function() {
-        this.closest('.basket__item').remove();
-        calculateTotals();
+            const productId = this.getAttribute('data-product-id');
+            const productPrice = parseFloat(this.getAttribute('data-product-price'));
+            const quantityInput = this.previousElementSibling;
+            let quantity = 1;
+
+            if (quantityInput && quantityInput.classList.contains('quantity-input')) {
+                quantity = parseInt(quantityInput.value) || 1;
+            }
+
+            let basket = JSON.parse(localStorage.getItem('basket')) || [];
+            const existingIndex = basket.findIndex(item => item.id === productId);
+
+            if (existingIndex !== -1) {
+                basket[existingIndex].quantity += quantity;
+            } else {
+                basket.push({
+                    id: productId,
+                    price: productPrice,
+                    quantity: quantity,
+                    name: this.closest('.bulb__info').querySelector('.bulb__name').textContent,
+                    image: this.closest('.light-bulbs__item').querySelector('img').getAttribute('src')
+                });
+            }
+
+            localStorage.setItem('basket', JSON.stringify(basket));
+            updateBasketCount();
+            alert('Товар добавлен в корзину!');
         });
     });
 
-    modalCloseBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-    
-    calculateTotals();
+    updateBasketCount();
 });
-
-function saveBasketToStorage() {
-    const basketItems = [];
-    
-    document.querySelectorAll('.basket__item').forEach(item => {
-        basketItems.push({
-            image: item.querySelector('td:nth-child(1) img').src,
-            title: item.querySelector('td:nth-child(2)').textContent,
-            description: item.querySelector('td:nth-child(3)').textContent,
-            price: parseFloat(item.querySelector('td:nth-child(4)').textContent),
-            quantity: parseInt(item.querySelector('input[name="quantity_number"]').value)
-        });
-    });
-    
-    const subtotal = document.querySelector('input[name="subtotal"]').value;
-    const delivery = document.querySelector('input[name="delivery"]').value;
-    const total = document.querySelector('input[name="total"]').value;
-    
-    localStorage.setItem('basket', JSON.stringify(basketItems));
-    localStorage.setItem('basket_totals', JSON.stringify({
-        subtotal,
-        delivery,
-        total
-    }));
-}
