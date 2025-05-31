@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.products import models, schemas
-from app.products.file_utils import save_upload_file, delete_upload_file
+from app2.products import models, schemas
+from app2.products.file_utils import save_upload_file, delete_upload_file
 from typing import Optional, List
 from app.database.db import AsyncSessionLocal
 from sqlalchemy.future import select
